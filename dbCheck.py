@@ -29,10 +29,12 @@ def Check_Database(connectionString):
 def getListOfColumnNamesPerTable(tableName, connectionString):
     conn = pyodbc.connect(connectionString)
     cur = conn.cursor()
-    cur.execute("SELECT * FROM {1};", tableName)
+    cur.execute("SELECT * FROM {table_name};".format(table_name=tableName))
     val = cur.fetchall()
+
     tableColumns = cur.description
-    print(tableColumns)
+    for item in tableColumns:
+        print("column Name: ", item[0], "Column type: ", item[1])
     conn.close()
 
 
@@ -41,28 +43,31 @@ def removeMigrationHistory(tableNames: list):
     for item in tableNames:
         if item[0] != "__MigrationHistory":
             listToReturn.append(item[0])
+
     listToReturn.sort()
     return listToReturn
 
 
-def getListOfTableNames(ConnectionString):
-    listOfTableNames = []
-
+def getListOfTableNames(ConnectionString: str):
     conn = pyodbc.connect(ConnectionString)
     cur = conn.cursor()
     cur.execute("SELECT name FROM sys.tables;")
     tables = cur.fetchall()
     conn.close()
-    getListOfColumnNamesPerTable(tables[0], ConnectionString)
-    return removeMigrationHistory(tables)
+    tab = removeMigrationHistory(tables)
 
+    for item in tab:
+        print("Tablename??: ", item)
+        getListOfColumnNamesPerTable(item, ConnectionString)
+    # return removeMigrationHistory(tables)
 
+getListOfTableNames(QuotationString)
 # print(getListOfTableNames(QuotationString))
-conn = pyodbc.connect(QuotationString)
-cur = conn.cursor()
-cur.execute(f"SELECT * FROM QuotationRow;")
-val = cur.fetchall()
-tableColumns = cur.description
-for item in tableColumns:
-    print(item)
-conn.close()
+# conn = pyodbc.connect(QuotationString)
+# cur = conn.cursor()
+# cur.execute(f"SELECT * FROM QuotationRow;")
+# val = cur.fetchall()
+# tableColumns = cur.description
+# for item in tableColumns:
+#     print(item)
+# conn.close()
